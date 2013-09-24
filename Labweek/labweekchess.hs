@@ -13,14 +13,16 @@ data PieceColour = Black | White
 -- Exercise 9:
 
 pic1 :: Picture
-pic1 = left `beside` invert left
+pic1 = left `beside` right
     where
-      left = knight `above` invert knight
+      left  = knight `above` invert knight
+      right = invert left
 
 pic2 :: Picture
-pic2 = top `above` flipV top
+pic2 = top `above` bottom
     where
-      top = knight `beside` invert knight
+      top    = knight `beside` invert knight
+      bottom = flipV top
 
 
 -- Exercise 10:
