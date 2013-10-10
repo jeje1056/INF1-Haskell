@@ -111,5 +111,5 @@ countFreqs string = map (reduceBucket id (+) 0) $ groupByKey $ map (\c -> (c, 1)
 freqDecipher :: String -> [String]
 freqDecipher string = map ((`decrypt` string) . delta) e_candidates
   where
-    e_candidates  = map fst $ sortBy ((flip . comparing) snd) (countFreqs string)
-    delta char    = (ord char - ord 'e') `mod` 26
+    e_candidates  = map fst $ sortBy ((flip . comparing) snd) $ countFreqs string
+    delta char    = (ord char - ord 'E') `mod` 26
