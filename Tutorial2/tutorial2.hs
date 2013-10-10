@@ -112,5 +112,4 @@ freqDecipher :: String -> [String]
 freqDecipher string = map ((`decrypt` string) . delta) e_candidates
   where
     e_candidates  = map fst $ sortBy ((flip . comparing) snd) (countFreqs string)
-    delta char    = (ord char - ord_e) `mod` 26
-      where ord_e = 69
+    delta char    = (ord char - ord 'e') `mod` 26
