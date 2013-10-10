@@ -101,9 +101,9 @@ decrypt n str = concat $ transpose $ chunksOf (length str `div` 5) $ decipherStr
 
 -- 16.
 countFreqs :: String -> [(Char, Int)]
-countFreqs string = map (reduceBucket id (+) 0) $ groupTuples $ map (\c -> (c, 1)) string
+countFreqs string = map (reduceBucket id (+) 0) $ groupByKey $ map (\c -> (c, 1)) string
   where
-    groupTuples = groupBy (on (==) fst) . sort
+    groupByKey                             = groupBy (on (==) fst) . sort
     reduceBucket key_f reduce_f base group = (key_f key, foldr (reduce_f . snd) base group)
       where key = fst $ head group
 
