@@ -5,6 +5,7 @@
 
 import Data.Char
 import Data.List
+import Data.Ord
 import Data.Function
 import Data.List.Split
 import Test.QuickCheck
@@ -108,4 +109,8 @@ countFreqs string = map (reduceBucket id (+) 0) $ groupTuples $ map (\c -> (c, 1
 
 -- 17
 freqDecipher :: String -> [String]
-freqDecipher = undefined
+freqDecipher string = map ((`decrypt` string) . delta) e_candidates
+  where
+    e_candidates  = map fst $ sortBy ((flip . comparing) snd) (countFreqs string)
+    delta char    = (ord char - ord_e) `mod` 26
+      where ord_e = 69
