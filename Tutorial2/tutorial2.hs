@@ -6,6 +6,7 @@
 import Data.Char
 import Data.List
 import Data.Ord
+import Data.Maybe
 import Data.Function
 import Data.List.Split
 import Test.QuickCheck
@@ -14,7 +15,9 @@ import Control.Monad
 
 -- 1.
 rotate :: Int -> [Char] -> [Char]
-rotate n str = drop n str ++ take n str
+rotate n str
+  | 0 <= n && n <= length str = drop n str ++ take n str
+  | otherwise                 = error "Rotation argument out of bounds"
 
 -- 2.
 prop_rotate :: Int -> String -> Bool
@@ -35,6 +38,9 @@ lookUp c tuples
   | otherwise    = head matches
     where
       matches    = [snd t | t <- tuples, fst t == c]
+
+lookUp' :: Char -> [(Char, Char)] -> Char
+lookUp' c = fromMaybe c . lookup c
 
 -- 5.
 encipher :: Int -> Char -> Char
