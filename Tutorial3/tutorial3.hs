@@ -169,9 +169,9 @@ plusM m1 m2
 -- 8.
 timesM :: Matrix -> Matrix -> Matrix
 timesM m1 m2
-  | not (valid m1 && valid m2)   = error "Matrices must be valid"
+  | not (valid m1 && valid m2)    = error "Matrices must be valid"
   | length (head m1) /= length m2 = error "Must be kxn and nxl Matrices"
-  | otherwise                    = map m3Row m1
+  | otherwise                     = map m3Row m1
     where
       m3Row m1_row = map (sum . zipWith (*) m1_row) $ transpose m2
 
