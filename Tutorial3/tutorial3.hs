@@ -164,7 +164,7 @@ plusM m1 m2
   | not (valid m1 && valid m2)               = error "Matrices must be valid"
   | length m1 /= length m2                   = error "Matrices must have the same number of Rows"
   | (length $ head m1) /= (length $ head m2) = error "Matrices must have the same number of Columns"
-  | otherwise                                = (zipWith $ zipWith (+)) m1 m2
+  | otherwise                                = zipWith (zipWith (+)) m1 m2
 
 -- 8.
 timesM :: Matrix -> Matrix -> Matrix
