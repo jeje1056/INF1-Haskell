@@ -50,6 +50,9 @@ toList (Node k a left right)
     | depth left == 0                     = toList (Node k a Leaf Leaf) ++ toList right
     | otherwise                           = toList left ++ toList (Node k a Leaf right)
 
+toList' Leaf = []
+toList' (Node k v left right) = toList left ++ [(k, v)] ++ toList right
+
 -- Exercise 8
 
 set :: Ord k => k -> a -> Keymap k a -> Keymap k a
@@ -57,8 +60,8 @@ set key value = f
     where
       f Leaf = Node key value Leaf Leaf
       f (Node k v left right) | key == k  = Node k value left right
-                              | key <= k  = Node k v (set key value left) right
-                              | otherwise = Node k v left (set key value right)
+                              | key <= k  = Node k v (f left) right
+                              | otherwise = Node k v left (f right)
 
 -- Exercise 9
 
@@ -68,8 +71,8 @@ get key = f
     f Leaf = Nothing
     f (Node k v left right)
       | key == k  = Just v
-      | key <= k  = get key left
-      | otherwise = get key right
+      | key <= k  = f left
+      | otherwise = f right
 
 prop_set_get :: Int -> Int -> Bool
 prop_set_get k v = get k (set k v testTree) == Just v

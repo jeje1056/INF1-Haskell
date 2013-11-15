@@ -35,14 +35,19 @@ testDB = fromList [
 
 -- Exercise 1
 
-longestProductLen :: [(Barcode, Item)] -> Int
-longestProductLen = recur_len 0
+longestProductLen' :: [(Barcode, Item)] -> Int
+longestProductLen' = recur_len 0
   where
     recur_len :: Int -> [(Barcode, Item)] -> Int
     recur_len max [] = max
     recur_len max ((k, (p, u)):rest)
       | length p > max = recur_len (length p) rest
       | otherwise      = recur_len max rest
+
+longestProductLen :: [(Barcode, Item)] -> Int
+longestProductLen = maximum . map product_length
+  where
+    product_length (k, (p, u)) = length p
 
 formatLine :: Int -> (Barcode, Item) -> String
 formatLine longest (bc, (p, u)) = bc ++ "..." ++ p ++ replicate pad '.' ++ "..." ++ u
@@ -63,7 +68,7 @@ maybeToList (Just e) = [e]
 
 listToMaybe :: [a] -> Maybe a
 listToMaybe []     = Nothing
-listToMaybe (x:xs) = Just x
+listToMaybe (x:_) = Just x
 
 catMaybes :: [Maybe a] -> [a]
 catMaybes = foldr maybe_append []
@@ -71,12 +76,18 @@ catMaybes = foldr maybe_append []
     maybe_append Nothing l  = l
     maybe_append (Just e) l = e : l
 
+catMaybes' :: [Maybe a] -> [a]
+catMaybes' = concat . map maybeToList
+
 -- Exercise 3
 
 getItems :: [Barcode] -> Catalogue -> [Item]
 getItems codes catalog = catMaybes $ map cata_lookup codes
   where
     cata_lookup code = get code catalog
+
+getItems' xs cat = catMaybes $ map (flip get cat) xs
+getItems'' xs cat = mapMaybe (`get` cat) xs
 
 
 
