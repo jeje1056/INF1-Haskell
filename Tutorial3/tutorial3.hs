@@ -1,179 +1,206 @@
--- Informatics 1 - Functional Programming
--- Tutorial 3
---
--- Week 5 - Due: 17/18 Oct.
+module Tutorial5 where
 
 import Data.Char
 import Data.List
 import Test.QuickCheck
-import Control.Monad
-
 
 
 -- 1. Map
 -- a.
-uppers :: String -> String
-uppers = map toUpper
-
--- b.
 doubles :: [Int] -> [Int]
-doubles = map (* 2)
+doubles xs = map dbles xs
+    where 
+        dbles x = x*2
+
+-- b.        
+penceToPounds :: [Int] -> [Float]
+penceToPounds xs = map pencepound xs
+    where 
+        pencepound x = fromIntegral(x) / 100  
 
 -- c.
-penceToPounds :: [Int] -> [Float]
-penceToPounds = map ((/ 100) . fromIntegral)
+uppers :: String -> String
+uppers xs = map toUpper xs
 
 -- d.
-uppers' :: String -> String
-uppers' str = [ toUpper c | c <- str ]
+uppersComp :: String -> String
+uppersComp xs = [toUpper x | x <- xs]
 
 prop_uppers :: String -> Bool
-prop_uppers = liftM2 (==) uppers uppers'
-
-
+prop_uppers s = uppers s == uppersComp s
 
 -- 2. Filter
 -- a.
 alphas :: String -> String
-alphas = filter isAlpha
+alphas xs = filter isAlpha xs
 
 -- b.
-rmChar ::  Char -> String -> String
-rmChar = filter . (/=)
+above :: Int -> [Int] -> [Int]
+above y xs = filter aboves xs
+    where 
+        aboves x = y < x
 
 -- c.
-above :: Int -> [Int] -> [Int]
-above = filter . (<)
+unequals :: [(Int,Int)] -> [(Int,Int)]
+unequals xs = filter pairs xs
+    where 
+        pairs (a,b) = a /= b
+
 
 -- d.
-unequals :: [(Int,Int)] -> [(Int,Int)]
-unequals = filter $ uncurry (/=)
+rmChar :: Char -> String -> String
+rmChar y xs = filter (/= y) xs
 
 -- e.
 rmCharComp :: Char -> String -> String
-rmCharComp drop_char str = [ c | c <- str, c /= drop_char ]
+rmCharComp y xs = [ x | x <- xs, x /=y ]
 
 prop_rmChar :: Char -> String -> Bool
-prop_rmChar c str = rmChar c str == rmCharComp c str
-
+prop_rmChar c s = rmChar c s == rmCharComp c s
 
 
 -- 3. Comprehensions vs. map & filter
 -- a.
-upperChars :: String -> String
-upperChars s = [toUpper c | c <- s, isAlpha c]
-
-upperChars' :: String -> String
-upperChars' = map toUpper . filter isAlpha
-
-prop_upperChars :: String -> Bool
-prop_upperChars s = upperChars s == upperChars' s
-
--- b.
 largeDoubles :: [Int] -> [Int]
 largeDoubles xs = [2 * x | x <- xs, x > 3]
 
 largeDoubles' :: [Int] -> [Int]
-largeDoubles' = map (* 2) . filter (> 3)
+largeDoubles' xs = map dbles (filter above xs)
+    where 
+        dbles x = x * 2 
+        above x = x > 3
 
 prop_largeDoubles :: [Int] -> Bool
 prop_largeDoubles xs = largeDoubles xs == largeDoubles' xs 
 
--- c.
+-- b.
 reverseEven :: [String] -> [String]
 reverseEven strs = [reverse s | s <- strs, even (length s)]
 
 reverseEven' :: [String] -> [String]
-reverseEven' = map reverse . filter (even . length)
+reverseEven' strs = map revers (filter evenlen strs)
+    where
+        revers x = reverse x  
+        evenlen x = even (length x)
 
 prop_reverseEven :: [String] -> Bool
 prop_reverseEven strs = reverseEven strs == reverseEven' strs
 
-
-
 -- 4. Foldr
 -- a.
-productRec :: [Int] -> Int
-productRec []     = 1
-productRec (x:xs) = x * productRec xs
-
-productFold :: [Int] -> Int
-productFold = foldr (*) 1
-
-prop_product :: [Int] -> Bool
-prop_product xs = productRec xs == productFold xs
-
--- b.
 andRec :: [Bool] -> Bool
-andRec []     = True
-andRec (b:bs) = b && andRec bs
+andRec [] = True
+andRec (x:xs)   | x == True = True && andRec xs
+                | otherwise = False
 
 andFold :: [Bool] -> Bool
-andFold = foldr (&&) True
+andFold xs = foldr (&&) True xs
 
-prop_and :: [Bool] -> Bool
-prop_and xs = andRec xs == andFold xs 
-
--- c.
+-- b.
 concatRec :: [[a]] -> [a]
-concatRec []       = []
-concatRec (l : ls) = l ++ concatRec ls
+concatRec [] = []
+concatRec (xs:xss) = xs ++ concatRec xss
 
 concatFold :: [[a]] -> [a]
-concatFold = foldr (++) []
+concatFold xss = foldr (++) [] xss
 
-prop_concat :: [String] -> Bool
-prop_concat strs = concatRec strs == concatFold strs
-
--- d.
+-- c.
 rmCharsRec :: String -> String -> String
-rmCharsRec [] s          = s
-rmCharsRec (c:cs) string = rmCharsRec cs $ rmChar c string
+rmCharsRec "" str2 = str2
+rmCharsRec (c:str1) str2 = rmCharsRec str1 (rmChar c str2)
 
 rmCharsFold :: String -> String -> String
-rmCharsFold = flip $ foldr rmChar
+rmCharsFold str1 str2 = foldr (rmChar) str2 str1
 
 prop_rmChars :: String -> String -> Bool
-prop_rmChars chars str = rmCharsRec chars str == rmCharsFold chars str
+prop_rmChars str1 str2 = rmCharsRec str1 str2 == rmCharsFold str1 str2
 
+-- Matrix multiplication
 
-
-type Matrix = [[Int]]
-
+type Matrix = [[Rational]]
 
 -- 5
 -- a.
 uniform :: [Int] -> Bool
-uniform l = all (== head l) l
+uniform xs = all (== head xs) xs
 
 -- b.
 valid :: Matrix -> Bool
-valid matrix = rule_1 && rule_2
+valid matrix = prop_1 && prop_2
   where
-    rule_1 = not (null matrix) && not (null $ head matrix)
-    rule_2 = uniform $ map length matrix
+    prop_1 = uniform (map length matrix)
+    prop_2 = not (null matrix) && not (null (head matrix))
 
 -- 6.
-zipWith' f xs ys = [ f x y | (x, y) <- zip xs ys ]
+matrixWidth :: Matrix -> Int
+matrixWidth m = length (head m) 
 
-zipWith'' f xs ys = map (uncurry f) $ zip xs ys
+matrixHeight :: Matrix -> Int
+matrixHeight m = length m
+
+plusM :: Matrix -> Matrix -> Matrix
+plusM m n = if (not (valid m && valid n)) && (matrixHeight m /= matrixHeight n) && (matrixWidth m /= matrixWidth n) then error "Matrix incorrect" else zipWith (zipWith (+)) m n
 
 -- 7.
-plusM :: Matrix -> Matrix -> Matrix
-plusM m1 m2
-  | not (valid m1 && valid m2)               = error "Matrices must be valid"
-  | length m1 /= length m2                   = error "Matrices must have the same number of Rows"
-  | (length $ head m1) /= (length $ head m2) = error "Matrices must have the same number of Columns"
-  | otherwise                                = zipWith (zipWith (+)) m1 m2
+timesM :: Matrix -> Matrix -> Matrix
+timesM m n = if (not (valid m && valid n)) && (matrixWidth m /= matrixWidth n) then error "Matrix incorrect" else zipWith (zipWith (*)) m n
 
 -- 8.
-timesM :: Matrix -> Matrix -> Matrix
-timesM m1 m2
-  | not (valid m1 && valid m2)    = error "Matrices must be valid"
-  | length (head m1) /= length m2 = error "Must be kxn and nxl Matrices"
-  | otherwise                     = map m3Row m1
-    where
-      m3Row m1_row = map (sum . zipWith (*) m1_row) $ transpose m2
+-- b.
+zipWith' :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith' f xs ys = [ f x y | (x,y) <- zip xs ys]
 
--- Optional material
+-- c.
+zipWith'' :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith'' f xs ys = map (uncurry f)(zip xs ys) 
+
+-- ** Optional material
+
 -- 9.
+
+-- Mapping functions
+mapMatrix :: (a -> b) -> [[a]] -> [[b]]
+mapMatrix f m = [map f x | x <- m]
+
+zipMatrix :: (a -> b -> c) -> [[a]] -> [[b]] -> [[c]]
+zipMatrix f m n = [zipWith f a b | (a,b) <- zip m n] 
+
+-- All ways of deleting a single element from a list
+removes :: [a] -> [[a]]     
+removes = undefined
+
+-- Produce a matrix of minors from a given matrix
+minors :: Matrix -> [[Matrix]]
+minors m = undefined
+
+-- A matrix where element a_ij = (-1)^(i + j)
+signMatrix :: Int -> Int -> Matrix
+signMatrix w h = undefined
+        
+determinant :: Matrix -> Rational
+determinant = undefined
+
+cofactors :: Matrix -> Matrix
+cofactors m = undefined        
+                
+scaleMatrix :: Rational -> Matrix -> Matrix
+scaleMatrix k = undefined
+
+inverse :: Matrix -> Matrix
+inverse m = undefined
+
+-- Tests
+identity :: Int -> Matrix
+identity n = undefined
+
+prop_inverse2 :: Rational -> Rational -> Rational 
+                -> Rational -> Property
+prop_inverse2 a b c d = undefined
+
+type Triple a = (a,a,a)
+        
+prop_inverse3 :: Triple Rational -> 
+                 Triple Rational -> 
+                 Triple Rational ->
+                 Property
+prop_inverse3 r1 r2 r3 = undefined
